@@ -211,9 +211,37 @@ which worked great for me. Good Luck! Any questions, let me know!
 
 
 
+<br>
+Dora Notes:
+
+Install dependent packages:
+```
+pip install -r requirements.txt
+```
+To install dlib on windows: May need to follow this to install cmake first https://medium.com/analytics-vidhya/how-to-install-dlib-library-for-python-in-windows-10-57348ba1117f.
 
 
+Entry point of adding masks to faces on the image:
+1)apply_mask.apply_masks_buf(img: nparray, masks: path to folder of mask files, apply_unique_masks: OFF by default)
 
+Example:
+```
+import cv2
+import apply_mask
+img = cv2.imread("examples/inputs/input_test1.jpg")
+img_w_mask = apply_mask.apply_masks_buf(img) 
+cv2.imwrite("examples/masked/test1_w_masks.JPG",img_w_mask)
+```
+2) To read image from a path: 
+python ./apply_mask.py -i examples/inputs/input_test1.jpg -m examples/masks -o examples/masked/input_test1_w_beard_glasses.jpg
+
+
+Run this project in docker:
+
+```
+docker build -t test-masks .
+docker run test-masks
+```
 
 
 

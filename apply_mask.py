@@ -3,6 +3,8 @@ import cv2
 import dlib
 import numpy as np
 
+from tools import validate_inputs
+
 # from mask_generator import make_mask
 
 
@@ -221,6 +223,62 @@ def apply_masks(input_paths, masks, output_paths, apply_unique_masks, is_video):
         shutil.rmtree(temp_out)
         print("\t[+] Saving as", output_paths[0])
 
+
+
+def apply_masks_buf(input_img, masks_path="examples/masks", apply_unique_masks=False):
+    masks = dict()
+    print("[+] Inspecting masks")
+    if os.path.isdir(masks_path):
+        masks = validate_inputs.load_masks(masks_path)
+    print("[+] Inspecting masks: Done.")
+    print("[+] Applying mask(s)") 
+    # img = cv2.imdecode(input_img, cv2.IMREAD_COLOR)
+    img = input_img
+    # find all faces
+    faces = get_rects(img)
+    if len(faces) == 0:
+        print("[-] no faces found")
+    print("[+] Found", len(faces), "faces")
+    out = img.copy()
+
+    # sort faces by size, start with the smallest
+    faces = sort_faces_by_size(faces)
+
+    masks_not_used = masks.copy()
+    for i, face in enumerate(faces, 0):
+        print("\t[face " + str(i + 1) + "]", end=' ')
+        # pick a random mask, check if unique mask was selected
+        mask_name, mask_front, mask_back, masks_not_used = get_random_mask(masks, masks_not_used,
+                                                                           apply_unique_masks)
+        if mask_name == None:
+            print("already used all masks once (you specified '-u' unique mask use)")
+            continue
+
+        print("picked mask", mask_name)
+        mask_face = get_rects(mask_back)[0]
+
+        # get landmarks
+        img = remove_alpha_channel(img)
+        face_ldmks = get_landmarks(img, face)
+        mask_ldmks = get_landmarks(mask_back, mask_face)
+
+        # # align mask to face
+        img = add_alpha_channel(img)
+        aligned_mask = align_mask_img(face_ldmks, img, mask_ldmks, mask_front)
+
+        x_offset = y_offset = 0
+        try:
+            for c in range(0, 3):
+                out[0:out.shape[0], 0:out.shape[1], c] = aligned_mask[:, :, c] * (
+                            aligned_mask[:, :, 3] / 255.0) + out[0:out.shape[0], 0:out.shape[1], c] * (
+                                                                     1.0 - aligned_mask[:, :, 3] / 255.0)
+        except Exception as e:
+            print(e)
+            pass
+
+
+    print("[+] Completd applying masks on ", len(faces), "faces")
+    return out
 
 
 
