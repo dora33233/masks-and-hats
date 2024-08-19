@@ -222,6 +222,7 @@ To install dlib on windows: May need to follow this to install cmake first https
 
 
 Entry point of adding masks to faces on the image:
+
 1)apply_mask.apply_masks_buf(img: nparray, masks: path to folder of mask files, apply_unique_masks: OFF by default)
 
 Example:
@@ -232,7 +233,7 @@ img = cv2.imread("examples/inputs/input_test1.jpg")
 img_w_mask = apply_mask.apply_masks_buf(img) 
 cv2.imwrite("examples/masked/test1_w_masks.JPG",img_w_mask)
 ```
-2) To read image from a path: 
+2)To read image from a path: 
 python ./apply_mask.py -i examples/inputs/input_test1.jpg -m examples/masks -o examples/masked/input_test1_w_beard_glasses.jpg
 
 
